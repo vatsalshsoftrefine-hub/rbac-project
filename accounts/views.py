@@ -6,6 +6,8 @@ from rest_framework import status
 from .models import UserModel
 from .serializers import RegisterSerializer
 from .serializers import LoginSerializer
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import check_password
 
 
 class RegisterUser(APIView):
@@ -44,7 +46,7 @@ class RegisterUser(APIView):
                 user_id=str(uuid.uuid4()),   # unique identifier for user
                 username=data['username'],
                 email=data['email'],
-                password=data['password'],   # plain for now, will hash later
+                password=make_password(data['password']),  # Hash the password
                 phone=data['phone'],
                 gender=data['gender'],
 
@@ -102,7 +104,7 @@ class LoginUser(APIView):
                 )
 
             # Step 4: Verify password
-            if user.password != password:
+            if not check_password(password, user.password):
                 return Response(
                     {"error": "Invalid password"},
                     status=400
