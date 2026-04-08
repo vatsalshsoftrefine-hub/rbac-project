@@ -1,0 +1,20 @@
+services:
+  web:
+    build: .
+    container_name: django-app
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      - dynamodb
+    environment:
+      AWS_ACCESS_KEY_ID: "dummy"
+      AWS_SECRET_ACCESS_KEY: "dummy"
+      AWS_DEFAULT_REGION: "us-west-2"
+
+  dynamodb:
+    image: amazon/dynamodb-local
+    container_name: dynamodb-local
+    ports:
+      - "8001:8000"
