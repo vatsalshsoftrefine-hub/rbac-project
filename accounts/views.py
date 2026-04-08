@@ -46,7 +46,7 @@ class RegisterUser(APIView):
                 user_id=str(uuid.uuid4()),   # unique ID
                 username=data['username'],
                 password=data['password'],  
-                role="user"   # 🔥 force role (security)
+                role="user"   # force role (security)
             )
 
             # Step 3: Save to DynamoDB
