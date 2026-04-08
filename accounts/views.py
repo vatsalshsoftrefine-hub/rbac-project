@@ -6,8 +6,11 @@ from rest_framework import status
 from .models import UserModel
 from .serializers import RegisterSerializer
 from .serializers import LoginSerializer
+
+
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class RegisterUser(APIView):
@@ -110,14 +113,20 @@ class LoginUser(APIView):
                     status=400
                 )
 
-            # Step 5: Login success response
+            # Step 5: Generate JWT tokens
+            refresh = RefreshToken()
+            refresh['user_id'] = user.user_id
+            refresh['role'] = user.role
             return Response({
-                "message": "Login successful",
+               "message": "Login successful",
+               "tokens": {         
+                   "refresh": str(refresh),
+                   "access": str(refresh.access_token),               
+                },
                 "user": {
                     "user_id": user.user_id,
                     "username": user.username,
                     "role": user.role
                 }
-            })
-
-        return Response(serializer.errors, status=400)
+})
+        return Response(serializer.errors, status=400) 

@@ -10,7 +10,7 @@ WORKDIR /app
 COPY . .
 
 # Install dependencies
-RUN pip install django djangorestframework pynamodb
+RUN pip install django djangorestframework pynamodb djangorestframework-simplejwt
 
 # Run server
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
