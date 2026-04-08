@@ -5,6 +5,7 @@ from rest_framework import status
 
 from .models import UserModel
 from .serializers import RegisterSerializer
+from .serializers import LoginSerializer
 
 
 class RegisterUser(APIView):
@@ -66,3 +67,55 @@ class RegisterUser(APIView):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
+    
+class LoginUser(APIView):
+    """
+    Handles user login.
+
+    - We manually fetch user from DynamoDB
+    - We manually verify password
+    """
+
+    def post(self, request):
+        # Step 1: Validate request data
+        serializer = LoginSerializer(data=request.data)
+
+        if serializer.is_valid():
+            data = serializer.validated_data
+
+            username = data['username']
+            password = data['password']
+
+            # Step 2: Find user in DynamoDB
+            user = None
+
+            for u in UserModel.scan():
+                if u.username == username:
+                    user = u
+                    break
+
+            # Step 3: Check if user exists
+            if not user:
+                return Response(
+                    {"error": "User not found"},
+                    status=404
+                )
+
+            # Step 4: Verify password
+            if user.password != password:
+                return Response(
+                    {"error": "Invalid password"},
+                    status=400
+                )
+
+            # Step 5: Login success response
+            return Response({
+                "message": "Login successful",
+                "user": {
+                    "user_id": user.user_id,
+                    "username": user.username,
+                    "role": user.role
+                }
+            })
+
+        return Response(serializer.errors, status=400)

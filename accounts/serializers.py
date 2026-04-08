@@ -7,11 +7,6 @@ class RegisterSerializer(serializers.Serializer):
     1. Input validation
     2. Data cleaning
     3. Structure enforcement
-
-    WHY NOT ModelSerializer?
-    - We are using PynamoDB (NoSQL)
-    - No Django ORM model
-    - So we use basic Serializer instead
     """
 
     username = serializers.CharField(max_length=100)
@@ -43,3 +38,16 @@ class RegisterSerializer(serializers.Serializer):
             raise serializers.ValidationError("Password too short")
 
         return data
+    
+
+class LoginSerializer(serializers.Serializer):
+    """
+    Handles login input validation.
+
+    Responsibilities:
+    - Ensure required fields are present
+    - Validate basic structure
+    """
+
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
