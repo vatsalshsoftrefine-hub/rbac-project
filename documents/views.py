@@ -55,3 +55,30 @@ class UploadDocumentView(APIView):
             "message": "File uploaded successfully"
         })
     
+class MyDocumentsView(APIView):
+    """
+    User can view their own documents
+    """
+
+    def get(self, request):
+        # Step 1: Get token
+        token = request.auth
+
+        if not token:
+            return Response({"error": "No token"}, status=401)
+
+        # Step 2: Extract user_id
+        user_id = token.get("user_id")
+
+        # Step 3: Fetch documents
+        documents = []
+
+        for doc in DocumentModel.scan():
+            if doc.user_id == user_id and doc.is_active:
+                documents.append({
+                    "document_id": doc.document_id,
+                    "file_name": doc.file_name,
+                    "file_url": doc.file_url
+                })
+
+        return Response(documents)
