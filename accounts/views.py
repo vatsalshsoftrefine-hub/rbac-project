@@ -179,3 +179,44 @@ class ProfileView(APIView):
             "gender": user.gender,
             "role": user.role
         })
+    
+class AllUsersView(APIView):
+    """
+    Admin can view all users
+    """
+
+    def get(self, request):
+        """
+        Step 1: Extract token
+        Step 2: Check role
+        Step 3: If admin → fetch all users
+        Step 4: Else → deny access
+        """
+
+        # Step 1: Extract token
+        token = request.auth
+
+        if not token:
+            return Response({"error": "No token"}, status=401)
+
+        # Step 2: Extract role
+        role = token.get("role")
+
+        # Step 3: Check admin
+        if role != "admin":
+            return Response(
+                {"error": "Access denied. Admin only."},
+                status=403
+            )
+
+        # Step 4: Fetch all users
+        users = []
+        for user in UserModel.scan():
+            users.append({
+                "user_id": user.user_id,
+                "username": user.username,
+                "email": user.email,
+                "role": user.role
+            })
+
+        return Response(users)
