@@ -220,3 +220,48 @@ class AllUsersView(APIView):
             })
 
         return Response(users)
+
+class UpdateProfileView(APIView):
+    """
+    Allows user to update their own profile
+    """
+
+    def put(self, request):
+        """
+        Step 1: Extract token
+        Step 2: Get user_id
+        Step 3: Fetch user
+        Step 4: Update fields
+        Step 5: Save
+        """
+
+        # Step 1: Get token
+        token = request.auth
+
+        if not token:
+            return Response({"error": "No token"}, status=401)
+
+        # Step 2: Extract user_id
+        user_id = token.get("user_id")
+
+        # Step 3: Fetch user
+        try:
+            user = UserModel.get(user_id)
+        except:
+            return Response({"error": "User not found"}, status=404)
+
+        # Step 4: Update fields (only allowed ones)
+        user.username = request.data.get("username", user.username)
+        user.email = request.data.get("email", user.email)
+        user.phone = request.data.get("phone", user.phone)
+        user.gender = request.data.get("gender", user.gender)
+
+        # Do NOT allow role update
+        # Do NOT allow password update here
+
+        # Step 5: Save
+        user.save()
+
+        return Response({
+            "message": "Profile updated successfully"
+        })
