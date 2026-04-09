@@ -124,3 +124,36 @@ class DeleteDocumentView(APIView):
         return Response({
             "message": "Document deleted successfully"
         })
+    
+class DisableDocumentView(APIView):
+    """
+    Disable document (soft delete)
+    """
+
+    def patch(self, request, document_id):
+        # Step 1: Get token
+        token = request.auth
+
+        if not token:
+            return Response({"error": "No token"}, status=401)
+
+        user_id = token.get("user_id")
+        role = token.get("role")
+
+        # Step 2: Fetch document
+        try:
+            doc = DocumentModel.get(document_id)
+        except:
+            return Response({"error": "Document not found"}, status=404)
+
+        # Step 3: RBAC check
+        if role != "admin" and doc.user_id != user_id:
+            return Response({"error": "Access denied"}, status=403)
+
+        # Step 4: Disable document
+        doc.is_active = False
+        doc.save()
+
+        return Response({
+            "message": "Document disabled successfully"
+        })
