@@ -12,6 +12,11 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from accounts.models import UserModel
+
+
 
 class RegisterUser(APIView):
     """
@@ -130,3 +135,47 @@ class LoginUser(APIView):
                 }
 })
         return Response(serializer.errors, status=400) 
+    
+class ProfileView(APIView):
+    """
+    Returns full profile of logged-in user using JWT
+    """
+
+    def get(self, request):
+        """
+        Step 1: Get token
+        Step 2: Extract user_id
+        Step 3: Fetch user from DynamoDB
+        Step 4: Return user details
+        """
+
+        # Step 1: Extract token from request
+        token = request.auth
+
+        if not token:
+            return Response(
+                {"error": "Authentication token missing"},
+                status=401
+            )
+
+        # Step 2: Extract user_id from token
+        user_id = token.get("user_id")
+
+        # Step 3: Fetch user from DynamoDB
+        try:
+            user = UserModel.get(user_id)
+        except:
+            return Response(
+                {"error": "User not found"},
+                status=404
+            )
+
+        # Step 4: Return user data
+        return Response({
+            "user_id": user.user_id,
+            "username": user.username,
+            "email": user.email,
+            "phone": user.phone,
+            "gender": user.gender,
+            "role": user.role
+        })
