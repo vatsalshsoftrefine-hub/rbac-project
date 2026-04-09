@@ -129,3 +129,5 @@ REST_FRAMEWORK = {
         'accounts.authentication.CustomJWTAuthentication',
     ),
 }
+MEDIA_ROOT = "/app/media"
+MEDIA_URL = "/media/"
