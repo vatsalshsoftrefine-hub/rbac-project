@@ -157,3 +157,35 @@ class DisableDocumentView(APIView):
         return Response({
             "message": "Document disabled successfully"
         })
+
+class AllDocumentsView(APIView):
+    """
+    Admin can view all documents
+    """
+
+    def get(self, request):
+        # Step 1: Get token
+        token = request.auth
+
+        if not token:
+            return Response({"error": "No token"}, status=401)
+
+        role = token.get("role")
+
+        # Step 2: Check admin
+        if role != "admin":
+            return Response({"error": "Access denied"}, status=403)
+
+        # Step 3: Fetch all documents
+        documents = []
+
+        for doc in DocumentModel.scan():
+            if doc.is_active:
+                documents.append({
+                    "document_id": doc.document_id,
+                    "user_id": doc.user_id,
+                    "file_name": doc.file_name,
+                    "file_url": doc.file_url
+                })
+
+        return Response(documents)
